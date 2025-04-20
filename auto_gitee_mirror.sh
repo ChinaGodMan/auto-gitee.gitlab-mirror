@@ -6,7 +6,7 @@ create_gitee_repo() {
     -d '{
       "access_token": "'"${ACCESS_TOKEN}"'",
       "name": "'"${repo_name}"'",
-      "private": false,
+      "private": true,
       "description": "'"${repo_name}"' 仓库"
     }'
 }
