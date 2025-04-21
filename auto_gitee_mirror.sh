@@ -1,4 +1,3 @@
-
 create_gitee_repo() {
   local repo_name=$1
   curl -s -o /dev/null -X POST "https://gitee.com/api/v5/user/repos" \
@@ -17,20 +16,31 @@ mirror() {
   local github_repo=$2
   local gitee_user=$3
   local gitee_repo=$4
+  local push_method=$5
   git clone https://$PAT_GITHUB_TOKEN@github.com/$github_user/$github_repo.git
   cd "$github_repo"
-  git remote add gitee "git@gitee.com:$gitee_user/$gitee_repo.git" >/dev/null 2>&1
+  if [ "$clone_method" = "ssh" ]; then
+    git remote add gitee "git@gitee.com:$gitee_user/$gitee_repo.git" >/dev/null 2>&1
+  else
+    echo "使用 HTTPS 推送"
+    git remote add gitee "https://$gitee_user:$ACCESS_TOKEN@gitee.com/$gitee_user/$gitee_repo.git" >/dev/null 2>&1
+  fi
+
   git remote set-head origin -d >/dev/null 2>&1
   git push gitee --prune +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/* >/dev/null 2>&1
   cd ..
 }
-list_repos_with_pagination() {  
+list_repos_with_pagination() {
   local per_page=100
   local page=1
-  local exclude=("auto-gitee-mirror" "stats" "github-stats" "github-stats-remotion" "github-action-dynamic-profile-page" "UserScriptsHistory")
+  local exclude_file=".mirrorignore"
+  local exclude=()
   local repos=()
   local api_url
   local username
+  if [[ -f "$exclude_file" ]]; then
+    mapfile -t exclude <"$exclude_file"
+  fi
   if [[ -n "$1" ]]; then
     username="$1"
     api_url="https://api.github.com/users/$username/repos"
@@ -48,7 +58,7 @@ list_repos_with_pagination() {
       if [[ ! " ${exclude[@]} " =~ " $repo " ]]; then
         repos+=("$repo")
       fi
-    done <<< "$current_repos"
+    done <<<"$current_repos"
     ((page++))
   done
   for repo in "${repos[@]}"; do
