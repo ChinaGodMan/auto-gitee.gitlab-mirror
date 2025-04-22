@@ -70,7 +70,7 @@ list_repos_with_pagination() {
     username="$1"
     api_url="https://api.github.com/users/$username/repos"
   else
-    username="ChinaGodMan"
+    username=$GITHUB_REPO_OWNER
     api_url="https://api.github.com/user/repos"
   fi
   while true; do

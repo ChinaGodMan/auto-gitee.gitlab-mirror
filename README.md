@@ -26,7 +26,7 @@
   list_repos_with_pagination <github_user_name>
   ```
 
-  > 无用户名参数则默认为`ChinaGodMan`
+  > 默认为当前用户
 
 - <h6>对指定用户的仓库进行镜像:无论仓库在 gitee 是否存在,都进行创建.</h6>
 
