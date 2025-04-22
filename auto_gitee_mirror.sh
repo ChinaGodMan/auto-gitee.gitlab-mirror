@@ -32,12 +32,15 @@ mirror() {
   local gitee_user=$3
   local gitee_repo=$4
   local push_method=$5
+  local check_mirror=$6
   # shellcheck disable=SC2086
-  if is_mirrorignore $github_user $github_repo; then
-    echo "[$github_repo] 禁止镜像"
-    return 0
+  if [ "$check_mirror" = "true" ]; then
+    if is_mirrorignore $github_user $github_repo; then
+      echo -e "\033[31m mirror:[$github_user/$github_repo]存在[.mirrorignore]文件,跳过镜像\033[0m"
+      return 0
+    fi
   fi
-  echo "正在同步仓库：[$github_repo]"
+  echo -e "\033[32m正在同步仓库:[$github_user/$github_repo]\033[0m"
   # shellcheck disable=SC2086
   git clone https://$PAT_GITHUB_TOKEN@github.com/$github_user/$github_repo.git
   # shellcheck disable=SC2164
@@ -45,7 +48,6 @@ mirror() {
   if [ "$push_method" = "ssh" ]; then
     git remote add gitee "git@gitee.com:$gitee_user/$gitee_repo.git" >/dev/null 2>&1
   else
-    echo "使用 HTTPS 推送"
     git remote add gitee "https://$gitee_user:$ACCESS_TOKEN@gitee.com/$gitee_user/$gitee_repo.git" >/dev/null 2>&1
   fi
 
@@ -91,8 +93,15 @@ list_repos_with_pagination() {
     ((page++))
   done
   for repo in "${repos[@]}"; do
-    create_gitee_repo "$repo"
-    mirror "$username" "$repo" "$GITEE_USERNAME" "$repo"
+    # shellcheck disable=SC2086
+    #! 在此处进行判断,不然直接执行gitee创建仓库了
+    if is_mirrorignore $username $repo; then
+      echo -e "\033[31m[$username/$repo]存在<.mirrorignore>文件,跳过镜像\033[0m"
+    else
+      create_gitee_repo "$repo"
+      mirror "$username" "$repo" "$GITEE_USERNAME" "$repo"
+    fi
+
   done
 }
 
