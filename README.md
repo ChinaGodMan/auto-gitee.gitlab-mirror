@@ -1,43 +1,92 @@
-<div align="center"> <img height="96px" width="96px" src="https://avatars.githubusercontent.com/u/96548841?v=4" alt="UserScripts"></a><h1>Auto Gitee Mirror</h1>
+<div align="right">
+    <h6>
+        <picture>
+            <source type="image/svg+xml" media="(prefers-color-scheme: dark)"
+                srcset="https://assets.aiwebextensions.com/images/icons/earth/white/icon32.svg">
+            <img height=14
+                src="https://assets.aiwebextensions.com/images/icons/earth/black/icon32.svg">
+        </picture>
+        English|
+        <a href="https://github.com/ChinaGodMan/auto-gitee-mirror/blob/main/README.zh-CN.md">简体中文</a>
+    <br>
+    </h6>
+</div>
+<div align="center">
+  <img height="96px" width="96px" src="https://avatars.githubusercontent.com/u/96548841?v=4" alt="UserScripts">
+  <h1>Auto Gitee&GitLab Mirror</h1>
 
-### 自动镜像 GitHub↠Gitee &GitLab
+### Automatically Mirror GitHub ↠ Gitee & GitLab
 
 </div>
 
-灵感来源于 https://github.com/ouuan/Auto-Gitee-Mirror/blob/master/.github/workflows/mirror.yml
+Inspired by https://github.com/ouuan/Auto-Gitee-Mirror/blob/master/.github/workflows/mirror.yml
 
 > [!WARNING]
-> 暂不支持 lfs 管理的仓库
+> LFS-managed repositories are not supported yet.
 
-## 脚本功能
+## Script Features
 
-- **自动创建 Gitee 仓库**：根据 GitHub 仓库的名称创建私有的 Gitee 仓库。
-- **仓库同步**：从 GitHub 克隆仓库代码并推送至 Gitee。
-- **忽略规则**：通过 `.mirrorignore` 文件排除不需要同步的仓库。
-- **忽略规则**： `.mirrorignore` 也作为占位判断,如果同步的仓库下存在这个文件,跳过同步.(无论本程序根目录下`.mirrorignore`未排除此仓库)
-- **批量处理**：支持分页拉取 GitHub 仓库列表并进行同步。
-- **推送方式**：支持通过 HTTPS 或 SSH 推送代码到 Gitee。
+- **Automatically Create Gitee & GitLab Repositories**: Creates private repositories on Gitee or GitLab based on the GitHub repository name.
+- **Repository Synchronization**: Clones code from GitHub and pushes it to Gitee or GitLab.
+- **Ignore Rules**: Excludes repositories from synchronization using a `.mirrorignore` file.
+- **Ignore Rules (Extended)**: The `.mirrorignore` file also acts as a placeholder. If this file exists in the repository being synchronized, it skips synchronization (regardless of the `.mirrorignore` settings in the program's root directory).
+- **Batch Processing**: Supports pagination for fetching GitHub repositories and synchronizing them.
+- **Push Methods**: Supports pushing code to Gitee or GitLab via HTTPS or SSH.
 
-## 操作:
+---
 
-- 批量对指定用户的仓库进行镜像:
+### Pushing to GitLab
+
+**Set Up Environment Variables**
+
+- `GITLAB_ACCESS_TOKEN`: Access token for GitLab.
+- `PAT_GITHUB_TOKEN`: Access token for GitHub.
+- `GITLAB_USERNAME`: GitLab username.
+- `GITLAB_SSH_PRIVATE_KEY`: SSH private key for GitLab.
+
+**Usage**
+
+- Batch mirror repositories for a specified user:
 
   ```bash
   list_repos_with_pagination <github_user_name>
   ```
 
-  > 默认为当前用户
+  > Defaults to the current user.
 
-- <h6>对指定用户的仓库进行镜像:无论仓库在 gitee 是否存在,都进行创建.</h6>
+- <h6>Mirror a specific repository: Creates the repository on GitLab if it does not already exist.</h6>
+
+  ```bash
+  create_gitlab_repo <gitlab_repo_name>
+
+  mirror <github_user_name> <github_repo_name> <gitlab_user_name> <gitlab_repo_name>
+  ```
+
+<img height=6px width="100%" src="https://media.chatgptautorefresh.com/images/separators/gradient-aqua.png?latest">
+
+### Pushing to Gitee
+
+**Set Up Environment Variables**
+
+- `ACCESS_TOKEN`： Access token for Gitee.
+- `PAT_GITHUB_TOKEN`：Access token for GitHub.
+- `GITEE_USERNAME`：Gitee username.
+- `GITEE_SSH_PRIVATE_KEY` ：SSH private key for Gitee.
+
+**Usage**
+
+- Batch mirror repositories for a specified user:
+
+  ```bash
+  list_repos_with_pagination <github_user_name>
+  ```
+
+  > Defaults to the current user.
+
+- <h6>Mirror a specific repository: Creates the repository on Gitee if it does not already exist.</h6>
 
   ```bash
   create_gitee_repo <gitee_repo_name>
 
   mirror <github_user_name> <github_repo_name> <gitee_user_name> <gitee_repo_name>
   ```
-
-### 变量
-
-- `ACCESS_TOKEN`：Gitee 的访问令牌。
-- `PAT_GITHUB_TOKEN`：GitHub 的访问令牌。
-- `GITEE_USERNAME`：Gitee 用户名。
