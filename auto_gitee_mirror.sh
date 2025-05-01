@@ -12,7 +12,23 @@ create_gitee_repo() {
       "description": "'"${repo_description}"'"
     }'
 }
-
+update_gitee_repo_description() {
+  local REPO_PATH=$1
+  local NEW_DESCRIPTION=$2
+  # shellcheck disable=SC2155
+  local USERNAME=$(echo "$REPO_PATH" | cut -d'/' -f1)
+  # shellcheck disable=SC2155
+  local REPO_NAME=$(echo "$REPO_PATH" | cut -d'/' -f2)
+  local API_URL="https://gitee.com/api/v5/repos/$USERNAME/$REPO_NAME"
+  curl -s -o /dev/null -X PATCH "$API_URL" \
+    -H "Authorization: token $ACCESS_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{
+          "name": "'"$REPO_NAME"'",
+          "owner": "'"$USERNAME"'",
+          "description": "'"$NEW_DESCRIPTION"'"
+          }'
+}
 is_mirrorignore() {
   local github_user=$1
   local github_repo=$2
@@ -43,7 +59,7 @@ mirror() {
   fi
   echo -e "\033[32m正在同步仓库:[$github_user/$github_repo]\033[0m"
   # shellcheck disable=SC2086
-  git clone https://$PAT_GITHUB_TOKEN@github.com/$github_user/$github_repo.git
+  git clone https://$PAT_GITHUB_TOKEN@github.com/$github_user/$github_repo.git >/dev/null 2>&1
   # shellcheck disable=SC2164
   cd "$github_repo"
   if [ "$push_method" = "ssh" ]; then
@@ -53,7 +69,13 @@ mirror() {
   fi
 
   git remote set-head origin -d >/dev/null 2>&1
-  git push gitee --prune +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/* >/dev/null 2>&1
+  output=$(git push gitee --prune +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/* 2>&1)
+  # shellcheck disable=SC2181
+  if [ $? -ne 0 ]; then
+    while IFS= read -r line; do
+      echo -e "\033[31m\t$line\033[0m"
+    done <<<"$output"
+  fi
   # shellcheck disable=SC2103
   cd ..
 }
@@ -104,6 +126,7 @@ list_repos_with_pagination() {
     if is_mirrorignore $username $repo_name; then
       echo -e "\033[31m[$username/$repo_name]存在<.mirrorignore>文件,跳过镜像\033[0m"
     else
+      #update_gitee_repo_description "$GITEE_USERNAME/$repo_name" "$repo_description"
       create_gitee_repo "$repo_name" "$repo_description"
       mirror "$username" "$repo_name" "$GITEE_USERNAME" "$repo_name"
     fi
