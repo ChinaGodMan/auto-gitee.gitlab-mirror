@@ -13,6 +13,19 @@ create_gitlab_repo() {
     }'
 }
 
+function update_gitlab_repo_description() {
+  local namespace_repo_name="$1"
+  local new_description="$2"
+  local encoded_namespace_repo_name
+  encoded_namespace_repo_name=$(echo -n "$namespace_repo_name" | sed -e 's/ /%20/g' -e 's/\//%2F/g' -e 's/:/%3A/g')
+  local url="https://gitlab.com/api/v4/projects/$encoded_namespace_repo_name"
+  local body="{\"description\":\"$new_description\"}"
+  curl -s -o /dev/null -X PUT "$url" \
+    -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$body"
+}
+
 is_mirrorignore() {
   local github_user=$1
   local github_repo=$2
@@ -43,7 +56,7 @@ mirror() {
   fi
   echo -e "\033[32m正在同步仓库:[$github_user/$github_repo]\033[0m"
   # shellcheck disable=SC2086
-  git clone https://$PAT_GITHUB_TOKEN@github.com/$github_user/$github_repo.git
+  git clone https://$PAT_GITHUB_TOKEN@github.com/$github_user/$github_repo.git >/dev/null 2>&1
   # shellcheck disable=SC2164
   cd "$github_repo"
   if [ "$push_method" = "ssh" ]; then
@@ -53,7 +66,13 @@ mirror() {
   fi
 
   git remote set-head origin -d >/dev/null 2>&1
-  git push gitlab --prune +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/* >/dev/null 2>&1
+  output=$(git push gitlab --prune +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/* 2>&1)
+  # shellcheck disable=SC2181
+  if [ $? -ne 0 ]; then
+    while IFS= read -r line; do
+      echo -e "\033[31m\t$line\033[0m"
+    done <<<"$output"
+  fi
   # shellcheck disable=SC2103
   cd ..
 }
@@ -102,8 +121,9 @@ list_repos_with_pagination() {
     # shellcheck disable=SC2086
     #! 在此处进行判断,不然直接执行gitlab创建仓库了
     if is_mirrorignore $username $repo_name; then
-      echo -e "\033[31m[$username/$repo_name]存在<.mirrorignore>文件,跳过镜像\033[0m"
+      echo -e "\033[31mGitHub:[$username/$repo_name]存在<.mirrorignore>文件,跳过镜像\033[0m"
     else
+      #update_gitlab_repo_description "$GITLAB_USERNAME/$repo_name" "$repo_description"
       create_gitlab_repo "$repo_name" "$repo_description"
       mirror "$username" "$repo_name" "$GITLAB_USERNAME" "$repo_name"
     fi
