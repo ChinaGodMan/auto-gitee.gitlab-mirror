@@ -2,12 +2,13 @@
 # shellcheck disable=SC2148
 create_gitlab_repo() {
   local repo_name=$1
+  local repo_description=$2
   curl -s -o /dev/null -X POST "https://gitlab.com/api/v4/projects" \
     -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" \
     -H "Content-Type: application/json" \
     -d '{
       "name": "'"${repo_name}"'",
-      "description": "'"${repo_name}"' 仓库",
+      "description": "'"${repo_description}"'",
       "visibility": "private"
     }'
 }
@@ -79,27 +80,32 @@ list_repos_with_pagination() {
     # shellcheck disable=SC2155
     local response=$(curl -s -H "Authorization: token $PAT_GITHUB_TOKEN" "$api_url?per_page=$per_page&page=$page")
     # shellcheck disable=SC2155
-    local current_repos=$(echo "$response" | jq -r '.[].name')
+    current_repos=$(echo "$response" | jq -r '.[] | "\(.name):\(.description)"')
     if [[ -z "$current_repos" ]]; then
       break
     fi
     while read -r repo; do
       # shellcheck disable=SC2199
       # shellcheck disable=SC2076
-      if [[ ! " ${exclude[@]} " =~ " $repo " ]]; then
+      repo_name=$(echo "$repo" | cut -d':' -f1)
+      # shellcheck disable=SC2199
+      # shellcheck disable=SC2076
+      if [[ ! " ${exclude[@]} " =~ " $repo_name " ]]; then
         repos+=("$repo")
       fi
     done <<<"$current_repos"
     ((page++))
   done
   for repo in "${repos[@]}"; do
+    repo_name=$(echo "$repo" | cut -d':' -f1)
+    repo_description=$(echo "$repo" | cut -d':' -f2-)
     # shellcheck disable=SC2086
     #! 在此处进行判断,不然直接执行gitlab创建仓库了
-    if is_mirrorignore $username $repo; then
-      echo -e "\033[31m[$username/$repo]存在<.mirrorignore>文件,跳过镜像\033[0m"
+    if is_mirrorignore $username $repo_name; then
+      echo -e "\033[31m[$username/$repo_name]存在<.mirrorignore>文件,跳过镜像\033[0m"
     else
-      create_gitlab_repo "$repo"
-      mirror "$username" "$repo" "$GITLAB_USERNAME" "$repo"
+      create_gitlab_repo "$repo_name" "$repo_description"
+      mirror "$username" "$repo_name" "$GITLAB_USERNAME" "$repo_name"
     fi
 
   done
