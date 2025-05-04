@@ -1,9 +1,8 @@
-name: Run GitLab Mirror
+name: GitLab Mirror
 
 on:
   schedule:
-    - cron: "0 4 1,15,28 * *"
-
+    - cron: "0 0,14 * * *"
   workflow_dispatch:
 jobs:
   push_to_gitlab:
