@@ -1,0 +1,49 @@
+name: Push to Gitee&GitLab
+
+on:
+  schedule:
+    - cron: "0 0,14 * * *"
+  workflow_dispatch:
+
+jobs:
+  push_to_gitee:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Push to Gitee
+        env:
+          PAT_GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
+          GITEE_SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
+          ACCESS_TOKEN: ${{ secrets.GITEE_ACCESS_TOKEN }}
+          GITEE_USERNAME: ${{ secrets.GITEE_USERNAME }}
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$GITEE_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo -e "Host gitee.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+          bash auto_gitee_mirror.sh
+
+  push_to_gitlab:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Push to GitLab
+        env:
+          PAT_GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
+          GITLAB_SSH_PRIVATE_KEY: ${{ secrets.GITLAB_SSH_PRIVATE_KEY }}
+          GITLAB_ACCESS_TOKEN: ${{ secrets.GITLAB_ACCESS_TOKEN }}
+          GITLAB_USERNAME: ${{ secrets.GITLAB_USERNAME }}
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo -e "Host gitlab.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+          bash auto_gitlab_mirror.sh
+          bash log.sh

@@ -1,0 +1,26 @@
+name: GitLab Mirror
+
+on:
+  #schedule:
+  #  - cron: "0 0,14 * * *"
+  workflow_dispatch:
+jobs:
+  push_to_gitlab:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up
+        env:
+          PAT_GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
+          GITLAB_SSH_PRIVATE_KEY: ${{ secrets.GITLAB_SSH_PRIVATE_KEY }}
+          GITLAB_ACCESS_TOKEN: ${{ secrets.GITLAB_ACCESS_TOKEN }}
+          GITLAB_USERNAME: ${{ secrets.GITLAB_USERNAME }}
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo -e "Host gitlab.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+          bash auto_gitlab_mirror.sh
