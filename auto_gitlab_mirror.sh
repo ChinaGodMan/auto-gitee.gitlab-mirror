@@ -125,7 +125,7 @@ list_repos_with_pagination() {
     else
       #update_gitlab_repo_description "$GITLAB_USERNAME/$repo_name" "$repo_description"
       create_gitlab_repo "$repo_name" "$repo_description"
-      mirror "$username" "$repo_name" "$GITLAB_USERNAME" "$repo_name"
+      mirror "$username" "$repo_name" "$GITLAB_USERNAME" "$repo_name"  "ssh"
     fi
 
   done
