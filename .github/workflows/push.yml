@@ -88,6 +88,6 @@ jobs:
           echo "$GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           echo -e "Host gitea.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-          bash auto_gita_mirror.sh
+          #bash auto_gita_mirror.sh
           
   
