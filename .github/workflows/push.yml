@@ -66,6 +66,6 @@ jobs:
           mkdir -p ~/.ssh
           echo "$GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo -e "Host gitlab.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+          echo -e "Host codeberg.org\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
           bash auto_codeberg_mirror.sh
           
