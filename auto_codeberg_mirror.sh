@@ -5,7 +5,7 @@ create_gitlab_repo() {
   local repo_description=$2
   curl -s -o /dev/null -X POST "https://codeberg.org/api/v1/user/repos" \
     -H "accept: application/json" \
-    -H "Authorization: token ${ACCESS_TOKEN}" \
+    -H "Authorization: token ${GITLAB_ACCESS_TOKEN}" \
     -H "Content-Type: application/json" \
     -d '{
       "name": "'"${repo_name}"'",
