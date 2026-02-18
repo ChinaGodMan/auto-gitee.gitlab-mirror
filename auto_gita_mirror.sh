@@ -3,7 +3,7 @@
 create_gitlab_repo() {
   local repo_name=$1
   local repo_description=$2
-  curl -s -o /dev/null -X POST "https://gita.com/api/v1/user/repos" \
+  curl -s -o /dev/null -X POST "https://gitea.com/api/v1/user/repos" \
     -H "accept: application/json" \
     -H "Authorization: token ${GITLAB_ACCESS_TOKEN}" \
     -H "Content-Type: application/json" \
@@ -62,7 +62,7 @@ mirror() {
   # shellcheck disable=SC2164
   cd "$github_repo"
   if [ "$push_method" = "ssh" ]; then
-    git remote add gitlab "git@gita.com:$gitlab_user/$gitlab_repo.git" >/dev/null 2>&1
+    git remote add gitlab "git@gitea.com:$gitlab_user/$gitlab_repo.git" >/dev/null 2>&1
   else
     git remote add gitlab "https://$gitlab_user:$GITLAB_ACCESS_TOKEN@gitlab.com/$gitlab_user/$gitlab_repo.git" >/dev/null 2>&1
   fi
