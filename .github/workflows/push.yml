@@ -47,3 +47,25 @@ jobs:
           echo -e "Host gitlab.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
           bash auto_gitlab_mirror.sh
           bash log.sh
+
+  push_to_codeberg:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Push to CodeBerg
+        env:
+          PAT_GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
+          GITLAB_SSH_PRIVATE_KEY: ${{ secrets.CODEBERG_SSH_PRIVATE_KEY }}
+          GITLAB_ACCESS_TOKEN: ${{ secrets.CODEBERG_ACCESS_TOKEN }}
+          GITLAB_USERNAME: ${{ secrets.CODEBERG_USERNAME }}
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo -e "Host gitlab.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+          bash auto_codeberg_mirror.sh
+          
