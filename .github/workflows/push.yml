@@ -79,7 +79,7 @@ jobs:
       - name: Push to Gita
         env:
           PAT_GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
-          GITLAB_SSH_PRIVATE_KEY: ${{ secrets.GITA_SSH_PRIVATE_KEY }}
+          GITLAB_SSH_PRIVATE_KEY: ${{ secrets.CODEBERG_SSH_PRIVATE_KEY }}
           GITLAB_ACCESS_TOKEN: ${{ secrets.GITA_ACCESS_TOKEN }}
           GITLAB_USERNAME: ${{ secrets.CODEBERG_USERNAME }}
           GITHUB_REPO_OWNER: ${{ github.repository_owner }}
@@ -87,7 +87,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "$GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo -e "Host codeberg.org\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+          echo -e "Host gita.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
           bash auto_codeberg_mirror.sh
           
   
