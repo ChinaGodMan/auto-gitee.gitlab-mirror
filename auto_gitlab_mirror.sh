@@ -124,7 +124,7 @@ list_repos_with_pagination() {
     if is_mirrorignore $username $repo_name; then
       echo -e "\033[31mGitHub:[$username/$repo_name]存在<.mirrorignore>文件,跳过镜像\033[0m"
     else
-      #update_gitlab_repo_description "$GITLAB_USERNAME/$repo_name" "$repo_description"
+      update_gitlab_repo_description "$GITLAB_USERNAME/$repo_name" "$repo_description"
       create_gitlab_repo "$repo_name" "$repo_description"
       mirror "$username" "$repo_name" "$GITLAB_USERNAME" "$repo_name"  "ssh"
     fi
