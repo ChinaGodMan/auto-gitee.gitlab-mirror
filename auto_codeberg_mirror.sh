@@ -3,13 +3,14 @@
 create_gitlab_repo() {
   local repo_name=$1
   local repo_description=$2
+  local safe_description=$(printf "%s" "$repo_description" | jq -R -s '.')
   curl -s -o /dev/null -X POST "https://codeberg.org/api/v1/user/repos" \
     -H "accept: application/json" \
     -H "Authorization: token ${GITLAB_ACCESS_TOKEN}" \
     -H "Content-Type: application/json" \
     -d '{
       "name": "'"${repo_name}"'",
-      "description": "'"${repo_description}"'",
+      "description": '"${safe_description}"',
       "private": true,
       "auto_init": false
     }'
