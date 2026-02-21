@@ -24,3 +24,4 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           echo -e "Host gitlab.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
           bash auto_gitlab_mirror.sh
+          bash gitlab-repo-compare.sh
