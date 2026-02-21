@@ -25,6 +25,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           echo -e "Host gitee.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
           bash auto_gitee_mirror.sh
+          bash repo-compare.sh
 
   push_to_gitlab:
     runs-on: ubuntu-latest
