@@ -17,11 +17,16 @@ create_gitlab_repo() {
 function update_gitlab_repo_description() {
   local namespace_repo_name="$1"
   local new_description="$2"
-  repo_description=$(printf "%s" "$new_description" | jq -R -s '.')
   local encoded_namespace_repo_name
-  encoded_namespace_repo_name=$(echo -n "$namespace_repo_name" | sed -e 's/ /%20/g' -e 's/\//%2F/g' -e 's/:/%3A/g')
+  
+  # URL 编码 - 注意 GitLab API 只需要对斜杠编码
+  encoded_namespace_repo_name=$(echo -n "$namespace_repo_name" | sed 's/\//%2F/g')
+  
   local url="https://gitlab.com/api/v4/projects/$encoded_namespace_repo_name"
-  local body="{\"description\":\"$repo_description\"}"
+  
+  # 使用 jq 直接构建正确的 JSON
+  local body=$(jq -n --arg desc "$new_description" '{description: $desc}')
+  
   curl -s -o /dev/null -X PUT "$url" \
     -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" \
     -H "Content-Type: application/json" \
@@ -126,8 +131,8 @@ list_repos_with_pagination() {
       echo -e "\033[31mGitHub:[$username/$repo_name]存在<.mirrorignore>文件,跳过镜像\033[0m"
     else
       update_gitlab_repo_description "$GITLAB_USERNAME/$repo_name" "$repo_description"
-      create_gitlab_repo "$repo_name" "$repo_description"
-      mirror "$username" "$repo_name" "$GITLAB_USERNAME" "$repo_name"  "ssh"
+      #create_gitlab_repo "$repo_name" "$repo_description"
+      #mirror "$username" "$repo_name" "$GITLAB_USERNAME" "$repo_name"  "ssh"
     fi
 
   done
