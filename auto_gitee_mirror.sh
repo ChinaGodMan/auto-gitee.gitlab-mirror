@@ -3,13 +3,14 @@
 create_gitee_repo() {
   local repo_name=$1
   local repo_description=$2
+  local safe_description=$(printf "%s" "$repo_description" | jq -R -s '.')
   curl -s -o /dev/null -X POST "https://gitee.com/api/v5/user/repos" \
     -H "Content-Type: application/json" \
     -d '{
       "access_token": "'"${ACCESS_TOKEN}"'",
       "name": "'"${repo_name}"'",
       "private": true,
-      "description": "'"${repo_description}"'"
+      "description": '"${safe_description}"'
     }'
 }
 update_gitee_repo_description() {
