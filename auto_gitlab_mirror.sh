@@ -3,12 +3,13 @@
 create_gitlab_repo() {
   local repo_name=$1
   local repo_description=$2
+  local safe_description=$(printf "%s" "$repo_description" | jq -R -s '.')
   curl -s -o /dev/null -X POST "https://gitlab.com/api/v4/projects" \
     -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" \
     -H "Content-Type: application/json" \
     -d '{
       "name": "'"${repo_name}"'",
-      "description": "'"${repo_description}"'",
+      "description": '"${safe_description}"',
       "visibility": "private"
     }'
 }
