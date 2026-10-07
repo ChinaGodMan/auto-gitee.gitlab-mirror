@@ -14,7 +14,7 @@
 
 <div align="center"> <img height="96px" width="96px" src="https://avatars.githubusercontent.com/u/96548841?v=4" alt="UserScripts"></a><h1>Auto Gitee&GitLab Mirror</h1>
 
-### 自动镜像 GitHub↠Gitee &GitLab
+### 镜像 GitHub↠Gitee &GitLab
 
 </div>
 
